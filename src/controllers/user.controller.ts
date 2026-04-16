@@ -1,0 +1,106 @@
+import { NextFunction, Response } from "express";
+import bcrypt from 'bcryptjs';
+
+import { AuthRequest } from "../middlewares/auth.middleware";
+import catchAsync from "../middlewares/catchAsync.middleware";
+
+import Employee from "../models/employee.model";
+import User from "../models/user.model";
+
+import ApiError from "../utils/apiError";
+import generateToken from "../utils/generateToken";
+
+// @desc    Get User Data
+// @route   GET /api/users/profile
+// @access  Private/Protect
+export const getProfile = catchAsync(async (req: AuthRequest, res: Response, next: NextFunction) => {
+  const user = await User.findById(req.user?._id);
+  if (!user) return next(new ApiError('User not found', 404));
+
+  const employee = await Employee.findOne({ user: user._id }).populate({
+    path: 'user',
+    select: '-password'
+  });
+  if (!employee) return next(new ApiError('Employee not found', 400));
+
+  res.status(200).json({ 
+    success: true, 
+    message: 'User retrieved successfully',
+    data: {
+      firstName: employee.firstName,
+      lastName: employee.lastName,
+      position: employee.position,
+      bio: employee.bio,
+      email: user.email,
+    }
+  });
+});
+
+// @desc    Update User Data
+// @route   PATCH /api/users/profile
+// @access  Private/Protect
+export const updateProfile = catchAsync(async (req: AuthRequest, res: Response, next: NextFunction) => {
+  const { firstName, lastName, email, position, bio } = req.body;
+
+  const user = await User.findById(req.user?._id);
+  if (!user) return next(new ApiError('User not found', 404));
+
+  if (email) user.email = email;
+
+  const employee = await Employee.findOne({ user: user._id }).populate({
+    path: 'user',
+    select: '-password'
+  });
+  if (!employee) return next(new ApiError('Employee not found', 404));
+
+  if (firstName) employee.firstName = firstName;
+  if (lastName) employee.lastName = lastName;
+  if (bio) employee.bio = bio;
+  if (position) employee.position = position;
+
+  await employee.save();
+  await user.save();
+
+  res.status(200).json({
+    success: true, 
+    message: "User updated successfully",
+    data: {
+      firstName: employee.firstName,
+      lastName: employee.lastName,
+      position: employee.position,
+      bio: employee.bio,
+      email: user.email,
+    }
+  });
+});
+
+// @desc    Change User Password
+// @route   PATCH /api/users/change-password
+// @access  Private/Protect
+export const changePassword = catchAsync(async (req: AuthRequest, res: Response, next: NextFunction) => {
+  const { newPassword } = req.body;
+
+  const user = await User.findById(req.user?._id);
+  if (!user) return next(new ApiError("User not found", 404));
+
+  user.password = await bcrypt.hash(newPassword, 10);
+  user.passwordChangedAt = new Date();
+
+  await user.save();
+
+  generateToken({
+    userId: user._id.toString(),
+    email: user.email,
+    role: user.role
+  }, res);
+
+  res.status(200).json({
+    success: true, 
+    message: 'Password changed successfully',
+    data: {
+      userId: user._id,
+      email: user.email,
+      role: user.role
+    }
+  })
+});
