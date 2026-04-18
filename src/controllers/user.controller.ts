@@ -75,7 +75,7 @@ export const updateProfile = catchAsync(async (req: AuthRequest, res: Response, 
 });
 
 // @desc    Change User Password
-// @route   PATCH /api/users/change-password
+// @route   PATCH /api/users/changePassword
 // @access  Private/Protect
 export const changePassword = catchAsync(async (req: AuthRequest, res: Response, next: NextFunction) => {
   const { newPassword } = req.body;

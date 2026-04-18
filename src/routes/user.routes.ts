@@ -16,6 +16,6 @@ router.route('/profile')
   .get(getProfile)
   .patch(updateMeValidator, updateProfile)
 
-router.patch('/change-password', changePasswordValidator, changePassword);
+router.patch('/changePassword', changePasswordValidator, changePassword);
 
 export default router;

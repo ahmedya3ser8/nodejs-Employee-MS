@@ -11,7 +11,26 @@ import catchAsync from "../middlewares/catchAsync.middleware";
 // @route   GET /api/employees
 // @access  Private/Admin
 export const getEmployees = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const employees = await Employee.find({ isActive: true }).sort({ createdAt: -1 });
+  const { search, department } = req.query;
+
+  const filter: any = { isActive: true };
+
+  if (search) {
+    filter.$or = [
+      { firstName: { $regex: search, $options: "i" } },
+      { lastName: { $regex: search, $options: "i" } },
+    ];
+  }
+
+  if (department) {
+    filter.department = department;
+  }
+
+  const employees = await Employee.find(filter).sort({ createdAt: -1 }).populate({
+    path: 'user',
+    select: '-password'
+  });
+  
   res.status(200).json({ 
     success: true, 
     message: 'Employees retrieved successfully',
@@ -23,7 +42,10 @@ export const getEmployees = catchAsync(async (req: Request, res: Response, next:
 // @route   GET /api/employees/:id
 // @access  Private/Admin
 export const getEmployee = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const employee = await Employee.findById(req.params.id);
+  const employee = await Employee.findById(req.params.id).populate({
+    path: 'user',
+    select: '-password'
+  });
   if (!employee) return next(new ApiError('Employee not found', 404));
 
   res.status(200).json({ 
@@ -134,6 +156,3 @@ export const deleteEmployee = catchAsync(async (req: Request, res: Response, nex
     data: null
   });
 });
-
-// Object.assign(employee, req.body);
-// await employee.save();
