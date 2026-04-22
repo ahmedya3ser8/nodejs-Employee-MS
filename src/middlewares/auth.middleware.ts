@@ -20,7 +20,8 @@ const protect = catchAsync(async (req: AuthRequest, res: Response, next: NextFun
 
   if (user.passwordChangedAt) {
     const passwordChangeTime = user.passwordChangedAt.getTime() / 1000;
-    if (passwordChangeTime > decoded.iat!) return next(new ApiError('Password was changed recently. Please login again', 401));
+    if (passwordChangeTime > decoded.iat!) 
+      return next(new ApiError('Password was changed recently. Please login again', 401));
   }
 
   req.user = user;

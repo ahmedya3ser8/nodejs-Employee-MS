@@ -3,10 +3,11 @@ import express from 'express';
 import {
   login,
   logout,
-  getMe
+  getMe,
+  changePassword
 } from '../controllers/auth.controller';
 import protect from '../middlewares/auth.middleware';
-import { loginValidator } from '../validations/auth.validator';
+import { changePasswordValidator, loginValidator } from '../validations/auth.validator';
 
 const router = express.Router();
 
@@ -14,5 +15,7 @@ router.post('/login', loginValidator, login);
 router.post('/logout', protect, logout);
 
 router.get('/getMe', protect, getMe);
+
+router.patch('/changePassword', protect, changePasswordValidator, changePassword);
 
 export default router;

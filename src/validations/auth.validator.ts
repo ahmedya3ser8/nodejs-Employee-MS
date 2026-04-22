@@ -1,5 +1,8 @@
 import { body } from "express-validator";
+import bcrypt from 'bcryptjs';
 
+import User from "../models/user.model";
+import ApiError from "../utils/apiError";
 import validate from "../middlewares/validate.middleware";
 
 export const loginValidator = [
@@ -13,5 +16,24 @@ export const loginValidator = [
   body('password')
     .notEmpty()
     .withMessage('Password is required'),
+  validate
+];
+
+export const changePasswordValidator = [
+  body('currentPassword')
+    .notEmpty()
+    .withMessage('Current password is required')
+    .custom(async (value, { req }) => {
+      const user = await User.findById(req.user?._id);
+      if (!user) throw new ApiError('User not found', 404);
+
+      const isMatched = await bcrypt.compare(value, user.password);
+      if (!isMatched) throw new ApiError('Current password is incorrect', 400);
+
+      return true;
+    }),
+  body('newPassword')
+    .notEmpty()
+    .withMessage('New password is required'),
   validate
 ];

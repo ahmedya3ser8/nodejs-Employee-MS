@@ -1,5 +1,4 @@
 import { NextFunction, Response } from "express";
-import bcrypt from 'bcryptjs';
 
 import { AuthRequest } from "../middlewares/auth.middleware";
 import catchAsync from "../middlewares/catchAsync.middleware";
@@ -8,10 +7,9 @@ import Employee from "../models/employee.model";
 import User from "../models/user.model";
 
 import ApiError from "../utils/apiError";
-import generateToken from "../utils/generateToken";
 
-// @desc    Get User Data
-// @route   GET /api/users/profile
+// @desc    Get User Profile
+// @route   GET /api/profile
 // @access  Private/Protect
 export const getProfile = catchAsync(async (req: AuthRequest, res: Response, next: NextFunction) => {
   const user = await User.findById(req.user?._id);
@@ -36,8 +34,8 @@ export const getProfile = catchAsync(async (req: AuthRequest, res: Response, nex
   });
 });
 
-// @desc    Update User Data
-// @route   PATCH /api/users/profile
+// @desc    Update User Profile
+// @route   PATCH /api/profile
 // @access  Private/Protect
 export const updateProfile = catchAsync(async (req: AuthRequest, res: Response, next: NextFunction) => {
   const { firstName, lastName, email, position, bio } = req.body;
@@ -74,33 +72,3 @@ export const updateProfile = catchAsync(async (req: AuthRequest, res: Response, 
   });
 });
 
-// @desc    Change User Password
-// @route   PATCH /api/users/changePassword
-// @access  Private/Protect
-export const changePassword = catchAsync(async (req: AuthRequest, res: Response, next: NextFunction) => {
-  const { newPassword } = req.body;
-
-  const user = await User.findById(req.user?._id);
-  if (!user) return next(new ApiError("User not found", 404));
-
-  user.password = await bcrypt.hash(newPassword, 10);
-  user.passwordChangedAt = new Date();
-
-  await user.save();
-
-  generateToken({
-    userId: user._id.toString(),
-    email: user.email,
-    role: user.role
-  }, res);
-
-  res.status(200).json({
-    success: true, 
-    message: 'Password changed successfully',
-    data: {
-      userId: user._id,
-      email: user.email,
-      role: user.role
-    }
-  })
-});

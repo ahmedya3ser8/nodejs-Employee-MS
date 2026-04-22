@@ -9,17 +9,21 @@ import catchAsync from "../middlewares/catchAsync.middleware";
 
 // @desc    Get All Employees
 // @route   GET /api/employees
-// @access  Private/Admin
+// @access  Private/Admin-Protect
 export const getEmployees = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const { search, department } = req.query;
+  const search = typeof req.query.search === "string" ? req.query.search : "";
+  const department = typeof req.query.department === "string" ? req.query.department: "";
 
   const filter: any = { isActive: true };
 
   if (search) {
-    filter.$or = [
-      { firstName: { $regex: search, $options: "i" } },
-      { lastName: { $regex: search, $options: "i" } },
-    ];
+    const words = search.trim().split(/\s+/);
+    filter.$and = words.map((word) => ({
+      $or: [
+        { firstName: { $regex: word, $options: "i" } },
+        { lastName: { $regex: word, $options: "i" } },
+      ],
+    }));
   }
 
   if (department) {
@@ -88,15 +92,10 @@ export const createEmployee = catchAsync(async (req: Request, res: Response, nex
     user: user._id
   });
 
-  const result = await Employee.findById(employee._id).populate({
-    path: 'user',
-    select: '-password'
-  });
-
   res.status(201).json({ 
     success: true, 
     message: 'Employee Created successfully',
-    data: result
+    data: employee
   });
 });
 

@@ -18,15 +18,15 @@ import authorizeRoles from '../middlewares/role.middleware';
 
 const router = express.Router();
 
-router.use(protect, authorizeRoles('admin'));
+router.use(protect);
 
 router.route('/')
-  .get(getEmployees)
-  .post(createEmployeeValidator, createEmployee)
+  .get(authorizeRoles('admin', 'employee'), getEmployees)
+  .post(authorizeRoles('admin'), createEmployeeValidator, createEmployee)
 
 router.route('/:id')
-  .get(getEmployeeValidator, getEmployee)
-  .patch(updateEmployeeValidator, updateEmployee)
-  .delete(deleteEmployeeValidator, deleteEmployee)
+  .get(authorizeRoles('admin'), getEmployeeValidator, getEmployee)
+  .patch(authorizeRoles('admin'), updateEmployeeValidator, updateEmployee)
+  .delete(authorizeRoles('admin'), deleteEmployeeValidator, deleteEmployee)
 
 export default router;
