@@ -9,6 +9,7 @@ import employeeRoutes from './routes/employee.routes';
 import leaveRoutes from './routes/leave.routes';
 import payslipRoutes from './routes/payslip.routes';
 import attendanceRoutes from './routes/attendance.routes';
+import dashboardRoutes from './routes/dashboard.routes';
 
 import ApiError from './utils/apiError';
 import globalError from './middlewares/globalError.middleware';
@@ -40,6 +41,7 @@ app.use('/api/employees', employeeRoutes);
 app.use('/api/leaves', leaveRoutes);
 app.use('/api/payslips', payslipRoutes);
 app.use('/api/attendance', attendanceRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   next(new ApiError(`This resource: ${req.originalUrl} is not available`, 400));
