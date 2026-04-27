@@ -18,7 +18,8 @@ const app = express();
 
 const allowedOrigins = [
   'http://localhost:5173',
-  'http://localhost:4200'
+  'http://localhost:4200',
+  'https://employe-ms.netlify.app'
 ];
 
 app.use(cors({
