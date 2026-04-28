@@ -75,7 +75,7 @@ export const getEmployeeDashboard = catchAsync(async (req: AuthRequest, res: Res
     data: {
       daysPresent,
       pendingLeaves,
-      latestPayslip: latestPayslip?.netSalary
+      latestPayslip: latestPayslip?.netSalary || 0
     }
   })
 })

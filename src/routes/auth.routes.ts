@@ -12,7 +12,7 @@ import { changePasswordValidator, loginValidator } from '../validations/auth.val
 const router = express.Router();
 
 router.post('/login', loginValidator, login);
-router.post('/logout', protect, logout);
+router.post('/logout', logout);
 
 router.get('/getMe', protect, getMe);
 

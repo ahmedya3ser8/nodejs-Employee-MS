@@ -44,7 +44,7 @@ export const login = catchAsync(async (req: Request, res: Response, next: NextFu
 
 // @desc    Logout
 // @route   POST /api/auth/logout
-// @access  Private/Protect
+// @access  Public
 export const logout = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   res.clearCookie('ems_access_token', cookieConfig);
   res.status(200).json({
